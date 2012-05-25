@@ -1,0 +1,50 @@
+<!DOCTYPE html>          
+<html>                           
+  <head>                                            
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Node JS</title>
+    <style type="text/css">                    
+      html , body {
+        font: normal 0.9em arial , helvetica;
+      }                     
+    </style> 
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript"> 
+    $(document).ready(function() {
+      var socket  = io.connect('http://localhost:3000');
+        
+      $('#save').click(function() {
+        if ($('#employee_name').val() == '' || $('#employee_salary').val() == '') {
+          return alert('Please enter both nam e/salary!');
+        }
+        var data = {
+          names: $('#employee_name').val(),
+          salary: $('#employee_salary').val()
+        };
+        socket.emit('add employee', data);
+        $('#employee_name').val('');
+        $('#employee_salary').val('');
+      });
+
+      socket.on('populate', function(data) {
+        var out = "";
+        $.each(data, function(i, obj) {
+          out += "<li>"+obj.name+" is making "+obj.salary+"</li>";
+        });
+        $('#employees').html(out);
+      });
+    });
+    </script>  
+  </head>                                                                                                                              
+  <body>
+    <b>Create new employee</b>
+    <div>Name: <input type='text' id='employee_name' value=''></div>
+    <div>Salary: <input type='text' id='employee_salary' value=''></div>
+    <div><input type='button' value='Save' id='save'></div>
+    
+    <br> 
+    <b>List of Employees:</b>
+    <ul id='employees'></ul>
+  </body>                                                                                                                              
+</html> 
