@@ -19,10 +19,16 @@
             ul#employees
 
             form#myForm 
-                div.clonedInput#input1
+                div.Name#input1(style='display: none')
                     input(type='text', id='employee_name', value='name')
                     input(type='text', id='employee_salary', value='salary')
+                div.Exercise#input1(style='display: none')
+                    input(type='text', id='employee_name', value='Exercise')
+                    input(type='text', id='employee_salary', value='Sets')
+                    
                 div
-                    input(type='button', id='btnAdd', value='add another name')
-                    input(type='button', id='btnDel', value='remove name')
+                    input(type='button', name='Exercise', value='add another exercise', class="btnAdd" )
+                    input(type='button', name='Exercise', value='remove exercise', class="btnDel" )
+                    input(type='button', name='Name', value='add another name', class="btnAdd" )
+                    input(type='button', name='Name', value='remove name', class="btnDel" )
                     input(type='button', id='save', value='Save')
