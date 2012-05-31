@@ -24,12 +24,13 @@ html
                 var newNum  = new Number(num + 1);      // the numeric ID of the new input field being added
                 
                 // create the new element via clone(), and manipulate it's ID using newNum value
-                var newElem = $("."+classname+"#input" + num).clone().attr('id', 'input' + newNum);
+                var newElem = $(".Template_"+classname).clone().attr('id', classname + newNum);
                                 
-                newElem.children(':first').attr('id', 'name' + newNum).attr('name', 'name' + newNum);
+                //is this line needed?
+                //newElem.children(':first').attr('id', 'name' + newNum).attr('name', 'name' + newNum);
                 
                 // manipulate the name/id values of the input inside the new element
-                newElem.children(':first').attr('id', 'name' + newNum).attr('name', 'name' + newNum);
+                newElem.children(':first').attr('id', classname + newNum).attr('name', 'name' + newNum);
  
                 // insert the new element after the last "duplicatable" input field
                 $("."+classname+"#input" + num).after(newElem);
@@ -40,7 +41,8 @@ html
  
                 // business rule: you can only add 5 names
                 if (newNum == 12)
-                    $('#btnAdd').prop('disabled',true);
+                    $('#btnAdd').
+                    prop('disabled',true);
              });
  
              $('.btnDel').click(function() {
