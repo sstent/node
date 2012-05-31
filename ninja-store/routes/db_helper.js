@@ -33,8 +33,10 @@ client.query('USE mynode_db');
 //});
 //console.log('table employees is created.');
 
+
 // function to create employee
 exports.add_employee = function(data, callback) {
+console.log('Employee '+data.name+' has salary '+data.salary); 
  client.query("insert into employees (name, salary) values (?,?)", [data.name, data.salary], function(err, info) {
     // callback function returns last insert id
     callback(info.insertId);
@@ -43,27 +45,23 @@ exports.add_employee = function(data, callback) {
 }
 
 // function to get list of employees
-exports.get_employees = function(callback) {
-  client.query("select * from employees", function(err, results, fields) {
-    // callback function returns employees array
-    callback(results);
-  });
-}
+ exports.get_employees = function(callback) {
+ client.query("select * from employees", function(err, results, fields) {
+//callback function returns employees array
+ callback(results);
+   });
+ }
 
-// function to get list of employees
+// function to get data from database
 exports.get_all = function(data, callback) {
 console.log('Table '+data);
-  client.query("select * from employees", function(err, results, fields) {
+  client.query("select * from " + data, function(err, results, fields) {
     // callback function returns employees array
-	console.log('hmmmjson' + JSON.stringify(results));
-	var ook= "ook"
-    console.log('hmmmook' + ook);
-	callback(err,results);
-   //callback(results);
+      // Uncomment these if you want lots of feedback
+      // console.log('Results:');
+      // console.log(results);
+      // console.log('Field metadata:');
+      // console.log(fields);
+	callback(err,results,fields);
   });
 }
-
-exports.fake = function(callback) {
-console.log('database mynode_db is created.');
-};
-

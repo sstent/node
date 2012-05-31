@@ -3,7 +3,7 @@
  * Module dependencies.
  */
 
-var express = require('express');
+var express = require('express'); 
 var store = require('./routes/store');
 var db_helper = module.exports = require("./routes/db_helper.js");
 var app = module.exports = express.createServer();
@@ -13,6 +13,8 @@ var app = module.exports = express.createServer();
 app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
+  app.set('view options', { pretty: true });
+  //app.set('view options', { debug: true });
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(express.cookieParser());
@@ -32,11 +34,38 @@ app.configure('production', function(){
 
 // Routes
 
-app.get('/', store.home);
+app.get('/', function(req, res) {
+	// if user is not logged in, ask them to login
+	if (typeof req.session.username == 'undefined') res.render('home', { title: 'Ninja Store'});
+	// if user is logged in already, take them straight to the items list
+	else res.redirect('/items');
+});
+
 app.post('/', store.home_post_handler);
 
+app.get('/input', store.input);
+app.post('/input', store.input_post_handler);
+
 // display the list of item
-app.get('/items', store.items);
+
+
+app.get('/items', function(req, res) {
+    var items = db_helper.get_all('employees', function(err, items, fields) {
+    if (err) {
+        console.log("async1: " + err);
+    }
+    var keys = Object.keys( items );
+        var fieldkeys = Object.keys( fields );
+        var employees = items;
+        emitdata('populate',employees);
+        if (typeof req.session.username == 'undefined') res.redirect('/');
+        else res.render('items', { title: 'Ninja Store - Items', username: req.session.username, items:items, keys:keys, fieldkeys:fieldkeys  });
+    });
+});
+
+// show individual item
+//app.get('/items', store.items);
+
 // show individual item
 app.get('/item/:id', store.item);
 // show general pages
@@ -50,3 +79,43 @@ app.get('/logout', function(req, res) {
 
 app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+
+var emitdata = function(channel,data) {
+io.sockets.on('connection', function (socket) {
+  io.sockets.emit(channel, data);
+  });
+};
+
+var addemployee =  function(data) {
+    db_helper.add_employee(data, function(lastId) {  
+  });
+ db_helper.get_all('employees', function(err, items, fields) {
+    if (err) {
+        console.log("async1: " + err);
+    }
+    emitdata('populate',items);
+    });
+    
+    };
+
+                   
+var io = require('socket.io');
+io = io.listen(app);
+io.configure('development', function(){
+  io.set('close timeout', '50');
+});
+
+io.sockets.on('connection', function(client) {
+    
+  console.log('Client connected'); 
+  
+    // client add new employee
+  client.on('add employee', function(data) {
+            console.log("addemployee ")
+            addemployee(data);
+        });
+         });
+
+
+
+  

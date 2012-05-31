@@ -22,7 +22,7 @@
           names: $('#employee_name').val(),
           salary: $('#employee_salary').val()
         };
-        socket.emit('add employee', data);
+        socket.emit('add employee', 'data');
         $('#employee_name').val('');
         $('#employee_salary').val('');
       });

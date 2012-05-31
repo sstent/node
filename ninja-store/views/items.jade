@@ -4,9 +4,25 @@
     #display
         include userbar
             
-        -for (var id in items)
-            - var item = items[id]
-            div
-                a(href='/item/#{id}') #{item.name} - $#{item.price}
-        
-    include footer
+        div
+            table
+                thead
+                    - each itemfk in fieldkeys
+                        th= itemfk
+                tbody
+                    -for (var id in items)
+                        - var item = items[id]
+                        tr
+                         - each itemf in fieldkeys
+                                td= item[itemf]
+
+            ul#employees
+
+            form#myForm 
+                div.clonedInput#input1
+                    input(type='text', id='employee_name', value='name')
+                    input(type='text', id='employee_salary', value='salary')
+                div
+                    input(type='button', id='btnAdd', value='add another name')
+                    input(type='button', id='btnDel', value='remove name')
+                    input(type='button', id='save', value='Save')

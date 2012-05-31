@@ -1,0 +1,14 @@
+#container
+    #logo
+        a(href='/')
+            img(src='/images/logo.png')
+    #display
+        #login        
+            form(method='post')
+                | Enter new Name and Salary
+                div
+                    input(type='text', name='name')
+                    input(type='text', name='salary')
+                    input(type='submit', value='Save')
+        
+    include footer
