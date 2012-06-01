@@ -6,74 +6,73 @@ html
     script(src='http://code.jquery.com/jquery-1.6.1.min.js')
     script(src='/socket.io/socket.io.js')
     script
-             $(document).ready(function() {
+             //$(document).ready(function() {              
+     
                 var socket  = io.connect('http://localhost:3000');
                 
                 socket.on('populate', function(data) {
                 var out = "";
                 $.each(data, function(i, obj) {
-                  console.log('<li>'+obj.name+' is making '+obj.salary+'</li>');
+                  
                   out += "<li>"+obj.name+" is making "+obj.salary+"</li>";
                 });
                 $('#employees').html(out);
                 });
-              
-                $('.btnAdd').click(function() {
-                var classname = $(this).attr("name")
-                var num     = $('.' + classname).length; // how many "duplicatable" input fields we currently have
-                var newNum  = new Number(num + 1);      // the numeric ID of the new input field being added
+             $(function() { 
+                //Add more fields dynamically.
+                $('.AddNeut').click(function() {
+                    var field = $(this).attr('data-field')
+                    var area = $(this).attr('data-area')
+                    var limit = $(this).attr('data-limit')
+                    console.log('vars' + field + ',' + area + ',' + limit);
+                    //var field_area = $('#' + area);
+                    //var all_inputs = field_area.getElementsByTagName("input"); //Get all the input fields in the given area.
+                    //Find the count of the last element of the list. It will be in the format '<field><number>'. If the 
+                    //		field given in the argument is 'friend_' the last id will be 'friend_4'.
+                    var last_item = $('#' + field + ' li').length;
+                    console.log('last_item' + last_item);
+                    console.log('new_item' + (last_item + 1));
+                    //If the maximum number of elements have been reached, exit the function.
+                    //		If the given limit is lower than 0, infinite number of fields can be created.
+                    // if(count > limit && limit > 0) return;
+                    
+                    // if(document.createElement) { //W3C Dom method.
+                        // var li = document.createElement("li");
+                        // var input = document.createElement("input");
+                        // input.id = field+count;
+                        // input.name = field+count;
+                        // input.type = "text"; //Type of field - can be any valid input type like text,file,checkbox etc.
+                        // li.appendChild(input);
+                        // field_area.appendChild(li);
+                    // } else { //Older Method
+                        // field_area.innerHTML += "<li><input name='"+(field+count)+"' id='"+(field+count)+"' type='text' /></li>";
+                    // }
+                    
+                    // create the new element via clone(), and manipulate it's ID using newNum value
+                         var newElem = $('.' + area  + '_template').clone().attr('class',area);
+                         // var newElem = $('#' + area  + last_item ).clone().attr('id', area  + (last_item + 1));
+                          
+                        // newElem.children(':first').attr('id', 'name' + newNum).attr('name', 'name' + newNum);
                 
-                // create the new element via clone(), and manipulate it's ID using newNum value
-                var newElem = $(".Template_"+classname).clone().attr('id', classname + newNum);
-                                
-                //is this line needed?
-                //newElem.children(':first').attr('id', 'name' + newNum).attr('name', 'name' + newNum);
+                ////manipulate the name/id values of the input inside the new element
+                            // newElem.children(':first').attr('id', 'name' + newNum).attr('name', 'name' + newNum);
+ 
+                ////insert the new element after the last "duplicatable" input field
+                        $('#' + area + 'target').after(newElem);
+                        // $("."+classname+"#input" + newNum).css('display', 'block');
                 
-                // manipulate the name/id values of the input inside the new element
-                newElem.children(':first').attr('id', classname + newNum).attr('name', 'name' + newNum);
- 
-                // insert the new element after the last "duplicatable" input field
-                $("."+classname+"#input" + num).after(newElem);
-                $("."+classname+"#input" + newNum).css('display', 'block');
- 
-                // enable the "remove" button
-                $('.btnDel').prop('disabled',false);
- 
-                // business rule: you can only add 5 names
-                if (newNum == 12)
-                    $('#btnAdd').
-                    prop('disabled',true);
-             });
- 
-             $('.btnDel').click(function() {
-                var num = $('.clonedInput').length; // how many "duplicatable" input fields we currently have
-                $('#input' + num).remove();     // remove the last element
- 
-                // enable the "add" button
-                $('#btnAdd').prop('disabled',false);
- 
-                // if only one element remains, disable the "remove" button
-                if (num-1 == 1)
-                    $('#btnDel').prop('disabled',true);
-             });
- 
-             $('.btnDel').attr('disabled',true);
+                
+                     //return false;
+                });
              
              $('#save').click(function() {
-                
-                if ($('#employee_name').val() == '' || $('#employee_salary').val() == '') {
-                  return alert('Please enter both nam e/salary!');
-                }
-                var data = {
-                  name: $('#employee_name').val(),
-                  salary: $('#employee_salary').val()
-                };
-                console.log('socketpoking: ' + 'data');
-                socket.emit('add employee', data);
-                $('#employee_name').val('');
-                $('#employee_salary').val('');
+                    socket.emit('data', $('#myForm').serializeArray());
+                    console.log($('#myForm').serializeArray());
+                          // to prevent the page from changing
+                     return false;
               });
 
+                
              });
 
   body!= body

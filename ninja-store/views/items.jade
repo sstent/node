@@ -19,16 +19,20 @@
             ul#employees
 
             form#myForm 
-                div.Template_Name(style='display: none')
-                    input(type='text', id='employee_name', value='name')
-                    input(type='text', id='employee_salary', value='salary')
-                div.Template_Exercise(style='display: none')
-                    input(type='text', id='employee_name', value='Exercise')
-                    input(type='text', id='employee_salary', value='Sets')
+                ol(id='note_area')
+                        li(class='note')
+                            input(type='text', name='note_1', value='note')
+                            a(style='cursor:pointer;color:blue;', onclick='this.parentNode.parentNode.removeChild(this.parentNode);') Remove Field
+                ol(id='exercise_area')
+                        li(class='exercise')
+                            input(type='text', name='exercise_1, value='exercise')
+                            a(style='cursor:pointer;color:blue;', onclick='this.parentNode.parentNode.removeChild(this.parentNode);') Remove Field
+                        li(id='exercise_target')
+                input(type='button', class='AddNeut', value='Add note Field', data-field='note_area', data-area='note_', data-limit='0' )
+                input(type='button', class='AddNeut', value='Add exercise Field', data-field='exercise_area', data-area='exercise_', data-limit='0' )
+                input(type='submit', id='save', value='Save')
+
+        li(class='exercise_template')
+                            input(type='text', name='exercise_1, value='exercise')
+                            a(style='cursor:pointer;color:blue;', onclick='this.parentNode.parentNode.removeChild(this.parentNode);') Remove Field
                     
-                div
-                    input(type='button', name='Exercise', value='add another exercise', class="btnAdd" )
-                    input(type='button', name='Exercise', value='remove exercise', class="btnDel" )
-                    input(type='button', name='Name', value='add another name', class="btnAdd" )
-                    input(type='button', name='Name', value='remove name', class="btnDel" )
-                    input(type='button', id='save', value='Save')

@@ -114,6 +114,10 @@ io.sockets.on('connection', function(client) {
             console.log("addemployee ")
             addemployee(data);
         });
+  client.on('data', function(data) {
+            console.log("data" + JSON.stringify(data))
+        });      
+        
          });
 
 
