@@ -3,10 +3,10 @@ var MYSQL_USERNAME = 'root';
 var MYSQL_PASSWORD = 'condoms';
 
 // init;
-//var client = mysql.createClient({
-//  user: MYSQL_USERNAME,
-//  password: MYSQL_PASSWORD,
-//});
+var client = mysql.createClient({
+  user: MYSQL_USERNAME,
+  password: MYSQL_PASSWORD,
+});
 
 // destroy old db
 //client.query('DROP DATABASE IF EXISTS mynode_db', function(err) {
@@ -18,7 +18,7 @@ var MYSQL_PASSWORD = 'condoms';
 //  if (err) { throw err; }
 //});
 //console.log('database mynode_db is created.');
-//client.query('USE mynode_db');
+client.query('USE mynode_db');
 
 // create table
 //var sql = ""+

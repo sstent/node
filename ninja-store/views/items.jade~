@@ -4,6 +4,7 @@
     #display
         include userbar
             
+
         div
                 input(type='button', class='AddNeut', value='Add note Field', data-field='note_area', data-area='note_', data-limit='0', data-jsontag='activity.note')
                 input(type='button', class='AddNeut', value='Add exercise Field', data-field='exercise_area', data-area='exercise_', data-limit='0',data-jsontag='activity.exercise')
