@@ -9,36 +9,58 @@ html
     script(src='/form2js/jquery.toObject.js')
     script(src='/form2js/json2.js')
     script
-             //$(document).ready(function() {              
-     
+         $(function() {
                 var socket  = io.connect('http://localhost:3000');
                 
                 socket.on('populate', function(json) {
-                var out = "";
-                for (var n in json) { // Each top-level entry
-                                out += '<li>' + n + '<ul>';
-                                for (var i = 0; i < json[n].length; i++) { // Each sub-entry
-                                        out += '<li>' + json[n][i] + '</li>';
-                                        };
-                                out += '</ul></li>';
-                                };
-                console.log('out ' + out);
-                $('#employees').html(out);
+                    var content = "";
+                    $('#employees').empty(); 
+                    //iterate activities
+                    $.each (json, function (bb) {
+                        var activity = json[bb].activity;
+                        content += '<p>Activity - '+ bb + '</p>'; 
+                        $.each (activity.note, function (cc) {
+                            content += '<p>Note - '+ cc + '</p>'; 
+                        });
+                        $.each (activity.exercise, function (cc) {
+                            content += '<p>Exercise '+ cc +' - name:' + activity.exercise[cc].name +'</p>';
+                            content += '<p>Exercise '+ cc +' - sets:' + activity.exercise[cc].sets +'</p>';
+                            content += '<p>Exercise '+ cc +' - reps:' + activity.exercise[cc].reps +'</p>';
+                            content += '<p>Exercise '+ cc +' - weight:' + activity.exercise[cc].weight +'</p>';
+                        });
+                        
+                    });
+                  $(content).appendTo("#employees");
                 });
 
 
-             $(function() { 
+
+                 $('#AddAct').click(function() {
+                 $('#Activity').attr('style', 'display: block');
+                 var last_item = $('.ActivityBlock').length;
+                 //if last_item = 0
+                    var newElem = $('.ActivityBlock_T').clone().attr('style', 'display: block');
+                    $(newElem).attr('class', 'ActivityBlock');
+                    $(newElem).attr('id', 'ActivityBlock' + (last_item + 1) );
+                    $(newElem).children('.AddNeut').attr('data-activity','ActivityBlock' + (last_item + 1));
+                    $(newElem).children('.RemNeut').attr('data-activity','ActivityBlock' + (last_item + 1));
+                    $(newElem).children('.AddNeut').attr('data-activity','ActivityBlock' + (last_item + 1));
+                    $(newElem).appendTo('form#myForm');
+                    
+                 });
+               
                 //Add more fields dynamically.
                 $('.AddNeut').click(function() {
                     var field = $(this).attr('data-field');
                     var area = $(this).attr('data-area');
                     var limit = $(this).attr('data-limit');
-                    var jsontag = $(this).attr('data-jsontag');    
+                    var jsontag = $(this).attr('data-jsontag'); 
+                    var actblock = $(this).attr('data-activity'); 
                     var last_item = $('.' + area ).length;
-                    console.log('.' + area + ' li')
+                    console.log('div#' + actblock + ' ul#' + field + ' li:first')
                     console.log('LastItem - ',last_item, 'next_Item - ', (last_item + 1) );
                     // create the new element via clone(), and manipulate it's ID using newNum value
-                     var newElem = $('ol#' + field + ' li:first').clone().attr('style', 'display: block');
+                     var newElem = $('div#' + actblock + ' ul.' + field + ' li:first').clone().attr('style', 'display: block');
                      $(newElem).attr('class', area);
                      $(newElem).children('input').attr('disabled',false);
                      $(newElem).children('input').each(function(){
@@ -46,10 +68,34 @@ html
                         $(this).attr('name', newName);                     
                         console.log('name ' + newName);
                         });
-                     $(newElem).appendTo('ol#' +field);
-                     
+                     $(newElem).appendTo('ul#' +field);
+                     $('#'+ area + 'rem').attr('disabled',false);
                 });
              
+                $('.RemNeut').click(function() {
+                    var field = $(this).attr('data-field');
+                    var area = $(this).attr('data-area');
+                    var limit = $(this).attr('data-limit');
+                    var last_item = $('.' + area ).length;
+                    var actblock = $(this).attr('data-activity'); 
+                    console.log('.' + area + ' li')
+                    console.log('LastItem - ',last_item, 'next_Item - ', (last_item - 1) );
+                    if (last_item  != 0)
+                        $('div#' + actblock + ' ul.' + field + ' li:last').remove(); 
+                    
+                // enable the "add" button
+                    $('.AddNeut#' + area).attr('disabled',false);
+ 
+                // if only one element remains, disable the "remove" button
+                if ((last_item - 1) == 0)
+                    $('#'+ area + 'rem').attr('disabled','disabled');
+                
+                    console.log('#'+ area + ' .RemNeut')    
+                    
+                });
+                
+                
+                
              $('#save').click(function() {
                     var selector= "#myForm"
                     //var formDataFirst = $(selector).toObject({mode: 'first'});
@@ -58,7 +104,7 @@ html
                     
                     console.log('All ', JSON.stringify(formDataAll, null, '\t'));
                           // to prevent the page from changing
-                     return false;
+                     //return false;
               });
 
 

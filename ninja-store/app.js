@@ -53,12 +53,21 @@ app.post('/input', store.input_post_handler);
 
 
 app.get('/items', function(req, res) {
-                        testcollection.find({}, function(err, result) {
-                        result.each(function(err, data) {
-                                console.log(data);
-                                emitdata('populate',data);
-                                });
+                        // testcollection.find({}, function(err, result) {
+                        // if (err) throw err;
+                        // result.each(function(err, data) {
+                                // if (err) throw err;
+                                // console.log('This Is What I Got' + JSON.stringify(data));
+                                // emitdata('populate',data);
+                                // });
+                        // });
+                        
+                        testcollection.find().toArray(function(err, result) {
+                        if (err) throw err;
+                        console.log('This Is What I Got ' +JSON.stringify(result));
+                        emitdata('populate', result);
                         });
+                        
         if (typeof req.session.username == 'undefined') res.redirect('/');
         else res.render('items', { title: 'Ninja Store - Items'});
     //    else res.render('items', { title: 'Ninja Store - Items', username: req.session.username, items:items, keys:keys, fieldkeys:fieldkeys  });
@@ -94,28 +103,28 @@ io.sockets.on('connection', function (socket) {
 var io = require('socket.io');
 io = io.listen(app);
 io.configure('development', function(){
-  io.set('close timeout', '50');
+  io.set("transports", ["xhr-polling"]); 
+  io.set("polling duration", 10); 
 });
 
-io.sockets.on('connection', function(client) {
-    
+io.sockets.on('connection', function(socket) {
   console.log('Client connected'); 
   
-    // client add new employee
-  client.on('add employee', function(data) {
-            console.log("addemployee ")
-            addemployee(data);
-        });
-  client.on('data', function(data) {
+  socket.on('data', function(data) {
             console.log("data" + JSON.stringify(data))
                     testcollection.insert(data, function(err, result) {
                     if (err) throw err;
-                    if (result) console.log('Added!');
+                    if (result) console.log('Added!' + result);
                     });
-        });      
-        
          });
 
+    // client add new employee
+io.sockets.on('add employee', function(data) {
+            console.log("addemployee ")
+            addemployee(data);
+        });
+        
 
+        });      
 
   

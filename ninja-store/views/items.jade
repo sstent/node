@@ -5,25 +5,33 @@
         include userbar
             
         div
-                input(type='button', class='AddNeut', value='Add note Field', data-field='note_area', data-area='note_', data-limit='0', data-jsontag='activity.note')
-                input(type='button', class='AddNeut', value='Add exercise Field', data-field='exercise_area', data-area='exercise_', data-limit='0',data-jsontag='activity.exercise')
-                input(type='submit', id='save', value='Save')
-
-
-            form#myForm 
-                ol(id='note_area')
-                        li(class='note_T', style='display: none')
-                            label Note
-                            input(type='text', name='activity.note[]', value='Note', disabled='disabled')
-                            a(style='cursor:pointer;color:blue;', onclick='this.parentNode.parentNode.removeChild(this.parentNode);') Remove Field
-                ol(id='exercise_area')
-                        li(class='exercise_T', style='display: none')
-                            label Exercise                            
-                            input(type='text', name='activity.exercise[].name', value='Name', disabled='disabled')
-                            input(type='text', name='activity.exercise[].sets', value='Sets', disabled='disabled', class='numericonly')
-                            input(type='text', name='activity.exercise[].reps', value='Reps', disabled='disabled')
-                            input(type='text', name='activity.exercise[x].weight', value='Weight', disabled='disabled')
-                            a(style='cursor:pointer;color:blue;', onclick='this.parentNode.parentNode.removeChild(this.parentNode);') Remove Field             
+            input(type='Button', id='AddAct', value='Add Activity')
+            
+            
+            div(id='Activity',style='display: none')
+                form#myForm
+                    input(type='submit', id='save', value='Save')
+                    div(Class='ActivityBlock_T', style='display: none')
+                        input(type='button', class='AddNeut', value='Add note Field', data-field='note_area', data-area='note_', data-limit='0', data-jsontag='activity.note')
+                        input(type='button', class='AddNeut', value='Add exercise Field', data-field='exercise_area', data-area='exercise_', data-limit='0',data-jsontag='activity.exercise')
+                        input(type='button', class='RemNeut', value='Remove note Field', data-field='note_area', data-area='note_', data-limit='0', data-jsontag='activity.note', disabled='disabled')
+                        input(type='button', class='RemNeut', value='Remove exercise Field', data-field='exercise_area', data-area='exercise_', data-limit='0',data-jsontag='activity.exercise', disabled='disabled' )
+                        ul(class='Activity_area')
+                                li(class='exercise_T', style='display: none')
+                                    label Activity
+                                    input(type='text', name='activity.name', value='Name', disabled='disabled')
+                        ul(class='note_area')
+                                li(class='note_T', style='display: none')
+                                    label Note
+                                    input(type='text', name='activity.note[]', value='Note', disabled='disabled')
+                        ul(class='exercise_area')
+                                li(class='exercise_T', style='display: none')
+                                    label Exercise                            
+                                    input(type='text', name='activity.exercise[].name', value='Name', disabled='disabled')
+                                    input(type='text', name='activity.exercise[].sets', value='Sets', disabled='disabled', class='numericonly')
+                                    input(type='text', name='activity.exercise[].reps', value='Reps', disabled='disabled')
+                                    input(type='text', name='activity.exercise[].weight', value='Weight', disabled='disabled')
+                                
            ul#employees
         
                     
