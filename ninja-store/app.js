@@ -93,13 +93,7 @@ app.get('/logout', function(req, res) {
 app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 
-var emitdata = function(channel,data) {
-io.sockets.on('connection', function (socket) {
-  io.sockets.emit(channel, data);
-  });
-};
-
-                   
+                  
 var io = require('socket.io');
 io = io.listen(app);
 io.configure('development', function(){
@@ -117,14 +111,14 @@ io.sockets.on('connection', function(socket) {
                     if (result) console.log('Added!' + result);
                     });
          });
-
-    // client add new employee
-io.sockets.on('add employee', function(data) {
-            console.log("addemployee ")
-            addemployee(data);
         });
-        
 
-        });      
+function emitdata(channel,data) {
+    console.log('This Is What I should Emit ' +JSON.stringify(data));
+    io.sockets.on('connection', function (socket) {
+      console.log('This Is What I Emit ' +JSON.stringify(data));
+      socket.emit(channel, data);
+      });
+};        
 
   
