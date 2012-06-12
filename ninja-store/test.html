@@ -1,0 +1,91 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>jQuery &amp; jQueryUI Base - jsFiddle demo by fbleagh</title>  
+<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js'></script>
+<script type="text/javascript" src="http://code.jquery.com/ui/1.8.18/jquery-ui.min.js"></script>
+<link rel="stylesheet" type="text/css" href="http://ajax.microsoft.com/ajax/jquery.ui/1.8.7/themes/black-tie/jquery-ui.css">
+<script type='text/javascript' src="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.9/jquery-ui.js"></script>
+<style type='text/css'> 
+</style>
+
+<script type='text/javascript'>//<![CDATA[ 
+$(window).load(function(){
+$("#sortable").sortable({
+    placeholder: "ui-state-highlight",
+    revert: true,
+    stop: function(event, ui) {
+        $('#sortable').trigger('sortupdate')
+    },
+
+});                                
+
+$("#sortable").bind('sortupdate', function(event, ui) {
+             $('#sortable li').each(function(){
+                var itemindex= $(this).index()
+                $(this).children('input').each(function(){
+                var newname = $(this).attr('name').replace(/\[[0-9]*\]/,'[' + itemindex  + ']');
+                $(this).attr("name",newname)
+                });
+             });
+
+
+
+});                               
+
+//$(".new-item , .new-item2").draggable({
+//    connectToSortable: "#sortable",
+//    helper: "clone",
+//    revert: "invalid"
+//});
+//$("ul, li").disableSelection();
+
+//Removes slectable element
+$('ul').on('click', '.delete',function() {
+          $(this).parent().remove();
+          $('#sortable').trigger('sortupdate')
+});
+
+//sets buttons to be jquery buttons
+$("button").button();
+
+//adds selectable element
+$("button").click(function() { 
+              console.log('click');
+                var newElem = $('.new-item2').clone().attr('style', 'display: block');
+                    $(newElem).removeClass("new-item2");
+                    $(newElem).children('input').attr('disabled',false);
+                    $(newElem).appendTo('#sortable');
+                $(newElem).sortable( "refresh" );
+                $('#sortable').trigger('sortupdate');
+});
+
+});
+    
+    
+
+</script>
+
+
+</head>
+
+<button>A button element</button>
+<body>
+  <ul>
+    <li style="display: none" class="new-item ui-state-highlight">Drag me down</li>
+</ul>
+
+<ul>
+    <li style="display: none" class="new-item2 ui-state-highlight"><input type=text name=activity.exercise[0].name value=x"+ ui.item.index() +"><input type=text name=activity.exercise[0].sets value=x"+ ui.item.index() +"><a href=# class=delete>delete</a></li>
+</ul>
+
+test
+
+
+<ul id="sortable">
+   
+</ul>
+  
+</body>
+</html>
+

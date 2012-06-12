@@ -1,0 +1,260 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <title>Ninja Store - Items</title>
+    <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js'></script>
+    <script type="text/javascript" src="http://code.jquery.com/ui/1.8.18/jquery-ui.min.js"></script>
+    <script type='text/javascript' src="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.9/jquery-ui.js"></script>
+    <script src="/static/javascripts/jsrender.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/form2js/form2js.js"></script>
+    <script src="/static/form2js/jquery.toObject.js"></script>
+    <script src="/static/form2js/json2.js"></script>
+    <link rel="stylesheet" href="/static/stylesheets/smoothness/jquery-ui-1.8.20.custom.css"/>
+    <link rel="stylesheet" href="/static/stylesheets/style.css"/>
+    <script id="movieTemplate1" type="text/x-jsrender">
+      <h3>{{:activity.date}} - {{:activity.name}}</h3>
+      <div class="workoutdata">
+          <h4>{{:activity.date}} - {{:activity.name}}</h4>
+          <a  href=# class="activitydelete" title="{{:_id}}" >Delete</a>
+          {{if activity.lap}}  
+            {{for activity.lap}}
+                      <p>LAP  {{:#index+1}} - 
+                      {{if run}} Run - {{:run.name}} - {{:run.distance}}KM  in {{:run.time}}{{/if}}
+                      {{if bike}} Bike - {{:bike.name}} - {{:bike.distance}} x {{:bike.time}}{{/if}}
+                      {{if cardio}} Cardio - {{:cardio.name}} - {{:cardio.distance}} x {{:cardio.time}}{{/if}}
+                      {{if exercise}} Exercise - {{:exercise.name}} - {{:exercise.sets}} x {{:exercise.reps}} with {{:exercise.weight}} Kg{{/if}}
+                      {{if rest}} Recovery Step {{/if}}
+                      </p>
+                      
+            {{/for}}
+          {{/if}}            
+      </div>
+      
+    </script>
+    <script type='text/javascript'>
+         $(document).ready(function() {
+             var socket  = io.connect();
+             
+             socket.emit('populateactivities', 'please');
+             
+             socket.on('populateactivities', function(json) {
+                 console.log('#poulate recieved');
+                 var content = "";
+                 $(".workoutdata").hide(); 
+                 $('#ActivityList').empty(); 
+                 $( "#ActivityList" ).html(
+                     $( "#movieTemplate1" ).render( json )
+                    );
+                 $(".ui-accordion-content").css("display", "block");
+                 $("#ActivityList").accordion('destroy').accordion({ 
+                 header: 'h3', 
+                 active: false,
+                 collapsible: true
+                 });
+
+             });
+////populate exercise sortable
+//             socket.on('populateexercises', function(json) {
+ //                console.log('#exercises recieved');
+ ///                var content = "";
+  //              $(".workoutdata").hide(); 
+ //                $('#ActivityList').empty(); 
+                ///// for loop
+                   //create html with cvaraible                $( "#sortableexercises" ).html("<li class=ui-state-default>" + exercise+"</li>")
+                   //append to sortable
+                //end for
+                //create sortable
+ //                   );      
+                      
+ 
+
+
+
+             
+      $('#ActivityList').delegate('a.activitydelete', 'click', function() {   
+                 console.log('delete clicked' + $(this).attr('title'));
+                 socket.emit('delactivity', $(this).attr('title'));             
+                 return false;
+      });
+             
+             
+             
+  $("#sortable").sortable({
+    placeholder: "ui-state-highlight",
+    revert: true,
+    stop: function(event, ui) {
+        $('#sortable').trigger('sortupdate')
+    },
+
+});                                
+
+$("#sortable").bind('sortupdate', function(event, ui) {
+             $('#sortable li').each(function(){
+                var itemindex= $(this).index()
+                $(this).children('label.uiindex').html((itemindex +1));
+                $(this).children('input').each(function(){
+                    var newname = $(this).attr('name').replace(/\[[0-9]*\]/,'[' + itemindex  + ']');
+                    $(this).attr("name",newname);
+                    });
+             });
+
+
+
+});                               
+
+//Removes slectable element
+$('ul').on('click', '.delete',function() {
+          $(this).parent().remove();
+          $('#sortable').trigger('sortupdate')
+});
+
+
+	$( "#tabs" ).tabs();
+    $( "#tabs" ).tabs('select' , 0);
+//sets buttons to be jquery buttons
+$("button").button();
+//sets datepickers
+$( "#datepicker" ).datepicker();
+
+$("button").button();   
+//adds selectable element
+$("button").click(function() { 
+                var addtype = $(this).attr('value');
+              console.log('click');
+                var newElem = $('.new-' + addtype).clone().attr('style', 'display: block');
+                    $(newElem).removeClass("new-" + addtype);
+                    $(newElem).children('input').attr('disabled',false);
+                    $(newElem).appendTo('#sortable');
+                $(newElem).sortable( "refresh" );
+                $('#sortable').trigger('sortupdate');
+});
+
+                  $('#Activity').find('input.datepicker').datepicker();
+                  $('#Activity').find('input.datepicker').datepicker('setDate', new Date());               
+      
+             
+             
+      $('#save').click(function() {
+                 var selector= "#myForm"
+                 //var formDataFirst = $(selector).toObject({mode: 'first'});
+                 var formDataAll = $(selector).toObject({mode: 'all'});
+                 socket.emit('addactivity', formDataAll);
+                 
+                 console.log('All ', JSON.stringify(formDataAll, null, '	'));
+                       // to prevent the page from changing
+                 $('ul#sortable li').remove();
+                 $('#Activity').find('input').attr('value','');
+                 $( "#tabs" ).tabs( "select" , 0 )
+                 $('#Activity').find('input.datepicker').datepicker();
+                 $('#Activity').find('input.datepicker').datepicker('setDate', new Date());
+                 return false;
+      });
+       
+      
+     $('#cancelform').click(function() {
+                 $('ul#sortable li').remove();
+                 return false;
+      });
+      
+ $('#my-text-link').click(function() { // bind click event to link
+    $tabs.tabs('select', 2); // switch to third tab
+    return false;
+});
+ 
+ 
+
+
+      });
+      
+    </script>
+  </head>
+  <body>
+<div id="container">
+<div id="logo"><img src="/images/logo.png"/></div>
+<div id="display">
+<ul>
+
+<li style="display: none" class="new-run ui-state-highlight"><label class="uiindex"></label>
+    <label>Run</label>
+    <input type="text" name="activity.lap[0].run.name" placeholder="Location">
+    <input type="text" name="activity.lap[0].run.time" placeholder="hh:mm:ss">
+<a href=# class=delete>delete</a></li>
+
+<li style="display: none" class="new-bike ui-state-highlight"><label class="uiindex"></label>
+    <label>Bike</label>
+    <input type="text" name="activity.lap[0].bike.name" hint="Name" placeholder="Track Name">
+    <input type="text" name="activity.lap[0].bike.distance" placeholder="Distance">
+    <input type="text" name="activity.lap[0].bike.time" placeholder="hh:mm:ss">
+<a href=# class=delete>delete</a></li>
+
+<li style="display: none" class="new-cardio ui-state-highlight"><label class="uiindex"></label>
+    <label>Cardio</label>
+    <input type="text" name="activity.lap[0].cardio.name" placeholder="Machine">
+    <input type="text" name="activity.lap[0].cardio.distance" placeholder="Distance">
+    <input type="text" name="activity.lap[0].cardio.time" placeholder="hh:mm:ss">
+<a href=# class=delete>delete</a></li>
+
+<li style="display: none" class="new-exercise ui-state-highlight"><label class="uiindex"></label><label>Exercise</label>
+    <input type="text" name="activity.lap[0].exercise.name" placeholder="Exercise Name">
+    <input type="text" name="activity.lap[0].exercise.sets" placeholder="Sets">
+    <input type="text" name="activity.lap[0].exercise.sets" placeholder="Reps">
+<a href=# class=delete>delete</a></li>
+
+<li style="display: none" class="new-rest ui-state-highlight"><label class="uiindex"></label>
+    <label>Rest</label>
+    <input type="text" name="activity.lap[0].rest[0]" placeholder="Rest">
+<a href=# class=delete>delete</a></li>
+</ul>
+	
+<div id="tabs">
+    <ul>
+        <li><a href="#Activities">Activities</a></li>
+		<li><a href="#Activity">Add Activity</a></li>
+		<li><a href="#ExerciseEditor">Edit Exercises</a></li>
+		<li><a href="#ExpressoEditor">Edit Expresso Tracks</a></li>
+	</ul>
+    
+
+      <div id="Activity">
+        <button class="Add" value="run">Add Run</button>
+        <button class="Add" value="bike">Add Bike</button>
+        <button class="Add" value="exercise">Add Exercise</button>
+        <button class="Add" value="cardio">Add Cardio</button>
+        <button class="Add" value="rest">Add Rest</button>
+            <form id="myForm">
+            <ul id="activityheader">
+            <li><label>Activity Name</label><input type="text" name="activity.name" placeholder="Location"><label>Date</label><input type="text" class="datepicker" name="activity.date"></li>
+            </ul>
+            <ul id="sortable">
+            </ul>
+            <button type="submit" id="save" value="Save">Save</button>
+            <button type="button" id="cancelform" value="Cancel"/>Cancel</button>
+            </form>
+      </div>
+      
+      <div id="ExerciseEditor" >
+          <button type="button" class="cancel" value="Cancel"/>Cancel</button>
+          CODE FOR EDITING EXERCISES
+             <ul id="sortableexercises">
+            </ul>
+      </div>
+      
+      <div id="ExpressoEditor" >
+          <button type="button" class="cancel" value="Cancel"/>Cancel</button>
+          CODE FOR EDITING EXPRESSO TRACKS
+          <ul id="sortableexpresso">
+            </ul>
+      </div>
+     
+      <div id="Activities">
+      <ul id="ActivityList"></ul>
+      </div>
+</div>
+    </div>
+ </div>
+      
+
+</div></body>
+</html>

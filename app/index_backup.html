@@ -1,0 +1,216 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <title>Ninja Store - Items</title>
+    <link rel="stylesheet" href="/static/stylesheets/style.css"/>
+    <script src="/static/javascripts/jquery-1.7.2.min.js"></script>
+    <script src="/static/javascripts/jquery-ui-1.8.21.custom.min.js"></script>
+    <script src="/static/javascripts/jsrender.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/form2js/form2js.js"></script>
+    <script src="/static/form2js/jquery.toObject.js"></script>
+    <script src="/static/form2js/json2.js"></script>
+    <script id="movieTemplate1" type="text/x-jsrender">
+      <tr>
+          <td><p class=RowDelete id={{:_id}}>Delete</p></td>
+          <td class=RowShow id={{:_id}} colspan=3>{{:activity.name}}</td>
+          <td>{{:date}}</td>
+          <td>
+          {{if activity.note}}
+              {{for activity.note}}
+                  <div>
+                  <em>{{:name}}</em>
+                  </div>
+              {{/for}}
+          {{/if}} 
+          </td>
+          <td>
+          {{if activity.exercise}}
+             {{for activity.exercise}}
+                  <div>
+                  <em>{{:name}}</em><em>{{:sets}}</em><em>{{:reps}}</em><em>{{:weight}}</em>
+                  </div>
+             {{/for}}
+          {{/if}}
+          </td>
+          </td>
+      </tr>
+      
+      
+    </script>
+    <script type='text/javascript'>
+         $(document).ready(function() {
+             var socket  = io.connect();
+             
+             socket.emit('populateactivities', 'please');
+             
+             socket.on('populateactivities', function(json) {
+                 console.log('#poulate recieved');
+                 var content = "";
+                 $('#employees').empty(); 
+                 $( "#employees" ).html(
+                     $( "#movieTemplate1" ).render( json )
+             );
+             });
+             
+             
+             
+              $('#AddAct').click(function() {
+              $('#Activity').attr('style', 'display: block');
+              var last_item = $('.ActivityBlock').length;
+              //if last_item = 0
+                 var newElem = $('.ActivityBlock_T').clone(true, true).attr('style', 'display: block');
+                 $(newElem).attr('class', 'ActivityBlock');
+                 $(newElem).attr('id', 'ActivityBlock' + (last_item + 1) );
+                 //$(newElem).children('.AddNeut').attr('data-activity','ActivityBlock_' + (last_item + 1));
+                 //$(newElem).children('.RemNeut').attr('data-activity','ActivityBlock_' + (last_item + 1));
+                 $(newElem).children('.AddNeut').attr('disabled',false);
+                 //$(newElem).children('.RemNeut').attr('disabled',false);
+                 $(newElem).find('ul.activity li').children('input').attr('disabled',false);
+                 $(newElem).find('ul.activity li').attr('style', 'display: block');
+                 $(newElem).find('input.datefield').datepicker()
+                 $(newElem).find('input.datefield').datepicker('setDate', new Date())
+                 $(newElem).appendTo('form#myForm');
+                 
+              });
+              
+             //Add more fields dynamically.
+             $('input.AddNeut').click(function() {
+                 var field = $(this).attr('data-field');
+                 var area = $(this).attr('data-area');
+                 var limit = $(this).attr('data-limit');
+                 var actblock = $(this).closest('div').attr('id'); 
+                 var last_item = $('#' + actblock + ' .' + area ).length;
+                 console.log($(this).closest('div').attr('id'))
+                 console.log('#' + actblock + ' ul.' + field + ' li:first - LastItem - ',last_item, 'next_Item - ', (last_item + 1) );
+                 // create the new element via clone(), and manipulate it's ID using newNum value
+                  var newElem = $('#' + actblock + ' ul.' + area + ' li:first').clone().attr('style', 'display: block');
+                  $(newElem).attr('class', area);
+                  $(newElem).children('input').attr('disabled',false);
+                  $(newElem).children('input').each(function(){                     
+                     var newName = $(this).attr('name').replace('[i]','[' +(last_item) + ']');
+                     console.log('name ' + newName);
+                     $(this).attr('name', newName);
+                     });
+                  $(newElem).appendTo('div#' + actblock + ' ul.' +area);
+                  console.log('enable #' + actblock + ' .'+ area + 'rem');
+                  $('#' + actblock + ' .'+ area + 'rem').attr('disabled',false);
+             });
+             
+             $('input.RemNeut').click(function() {
+                 var field = $(this).attr('data-field');
+                 var area = $(this).attr('data-area');
+                 var limit = $(this).attr('data-limit');
+                 var actblock = $(this).closest('div').attr('id');
+                 var last_item = $('#' + actblock + ' .' + area ).length;
+                 console.log('.' + area + ' li')
+                 console.log('LastItem - ',last_item, 'next_Item - ', (last_item - 1) );
+                 if (last_item  != 1) {
+                     $('#' + actblock + ' ul.' + area + ' li:last').remove(); 
+                 };
+                 // enable the "add" button
+                 $('.AddNeut#' + area).attr('disabled',false);
+                 
+                 // if only one element remains, disable the "remove" button
+                 if (last_item == 2)
+                 $('#' + actblock + ' .'+ area + 'rem').attr('disabled','disabled');
+                 
+                 console.log('#'+ area + ' .RemNeut')    
+                 
+             });
+             
+             
+             
+      $('#save').click(function() {
+                 var selector= ".ActivityBlock"
+                 //var formDataFirst = $(selector).toObject({mode: 'first'});
+                 var formDataAll = $(selector).toObject({mode: 'all'});
+                 socket.emit('data', formDataAll);
+                 
+                 console.log('All ', JSON.stringify(formDataAll, null, '	'));
+                       // to prevent the page from changing
+                 $('.ActivityBlock').remove();
+                 $('#Activity').attr('style', 'display: none');
+                 
+                 return false;
+      });
+      
+           $('#cancel').click(function() {
+                 $('.ActivityBlock').remove();
+                 $('#Activity').attr('style', 'display: none');
+                 
+                 return false;
+           });
+           
+$("button").button();    
+
+    
+      });
+      
+    </script>
+  </head>
+  <body>
+<div id="container">
+  <div id="logo"><img src="/images/logo.png"/></div>
+  <div id="display">
+      <div>
+      <button id="AddAct">Add Activity</button>
+      <div id="Activity" style="display: none">
+        <form id="myForm">
+          <input type="submit" id="save" value="Save"/>
+          <input type="button" id="cancel" value="Cancel"/>
+          <div Class="ActivityBlock_T" style="display: none">
+            <input type="button" value="Add Note" data-field="note_area" data-area="note" data-limit="1" class="AddNeut"/>
+            <input type="button" value="Add Exercise" data-field="exercise_area" data-area="exercise" data-limit="10" class="AddNeut"/>
+            <input type="button" value="Add Run" data-field="run_area" data-area="run" data-limit="5" class="AddNeut"/>
+            <input type="button" value="Add Bike" data-field="bike_area" data-area="bike" data-limit="5" class="AddNeut"/>
+            <input type="button" value="Remove Note" data-field="note_area" data-area="note" data-limit="0" disabled="disabled" class="RemNeut noterem"/>
+            <input type="button" value="Remove Exercise" data-field="exercise_area" data-area="exercise" data-limit="0" disabled="disabled" class="RemNeut exerciserem"/>
+            <input type="button" value="Remove Run" data-field="exercise_area" data-area="exercise" data-limit="0" disabled="disabled" class="RemNeut runrem"/>
+            <input type="button" value="Remove Bike" data-field="exercise_area" data-area="exercise" data-limit="0" disabled="disabled" class="RemNeut bikerem"/>
+            <ul class="activity">
+              <li style="display: none" class="activity">
+                <label>Activity</label>
+                <input type="text" name="activity.name" value="Name" disabled="disabled"/>
+                <input type="text" disabled="disabled" class="datefield"/>
+              </li>
+            </ul>
+            <ul class="note">
+              <li style="display: none" class="note_T">
+                <label>Note</label>
+                <input type="text" name="activity.note[i]" value="Note" disabled="disabled"/>
+              </li>
+            </ul>
+            <ul class="exercise">
+              <li style="display: none" class="exercise_T">
+                <label>Exercise                            </label>
+                <input type="text" name="activity.exercise[i].name" value="Name" disabled="disabled"/>
+                <input type="text" name="activity.exercise[i].sets" value="Sets" disabled="disabled" class="numericonly"/>
+                <input type="text" name="activity.exercise[i].reps" value="Reps" disabled="disabled"/>
+                <input type="text" name="activity.exercise[i].weight" value="Weight" disabled="disabled"/>
+              </li>
+            </ul>
+            <ul class="run">
+              <li style="display: none" class="run_T">
+                <label>Run                            </label>
+                <input type="text" name="activity.run[i].time" value="Time" disabled="disabled"/>
+                <input type="text" name="activity.run[i].distance" value="Distance" disabled="disabled"/>
+                <input type="text" name="activity.run[i].location" value="Location" disabled="disabled"/>
+              </li>
+            </ul>
+            <ul class="bike">
+              <li style="display: none" class="bike_T">
+                <label>Bike                            </label>
+                <input type="text" name="activity.bike[i].track" value="Track" disabled="disabled"/>
+                <input type="text" name="activity.bike[i].time" value="Time" disabled="disabled" class="numericonly"/>
+              </li>
+            </ul>
+          </div>
+        </form>
+      </div>
+    </div>
+    <ul id="employees"></ul>
+  </div>
+</div></body>
+</html>
