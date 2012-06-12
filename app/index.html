@@ -56,17 +56,23 @@
 
              });
 ////populate exercise sortable
-//             socket.on('populateexercises', function(json) {
- //                console.log('#exercises recieved');
- ///                var content = "";
-  //              $(".workoutdata").hide(); 
- //                $('#ActivityList').empty(); 
+             socket.on('populateexercises', function(json) {
+                 console.log('#exercises recieved' + JSON.stringify(json, null, '	'));
+                 var content = "";
+                $('ul#sortableexercises li').remove();
+                $( "ul#sortableexercises" ).append('<li style="display: none"><input type="text" name="_id" value="'+ json[0]._id + '"></li>')
                 ///// for loop
-                   //create html with cvaraible                $( "#sortableexercises" ).html("<li class=ui-state-default>" + exercise+"</li>")
-                   //append to sortable
+                var array = json[0].exercise.name;
+                console.log('#exercises recieved' + array );
+                $.each(array, function(index, value) {
+                 console.log('beep' + value );
+                 console.log('index-' + index);
+                 console.log('value-' + value);
+                $( "ul#sortableexercises" ).append('<li class=ui-state-default><input type="text" name="exercise.name[]" value="'+ value + '"></li>')
+               });
                 //end for
                 //create sortable
- //                   );      
+});      
                       
  
 $( "#tabs" ).tabs();
@@ -99,11 +105,10 @@ $( "#datepicker" ).datepicker();
     
 
              
-      $('#ActivityList').delegate('a.activitydelete', 'click', function() {   
-                 console.log('delete clicked' + $(this).attr('title'));
-                 socket.emit('delactivity', $(this).attr('title'));             
-                 return false;
-      });
+$('#ActivityList').delegate('a.activitydelete', 'click', function() {   
+             socket.emit('delactivity', $(this).attr('title'));             
+             return false;
+});
              
              
              
@@ -125,14 +130,17 @@ $("#sortable").bind('sortupdate', function(event, ui) {
                     $(this).attr("name",newname);
                     });
              });
+});
 
-
-
-});                               
+  $("#sortableexercises").sortable({
+    placeholder: "ui-state-highlight",
+    revert: true,
+});
+                               
 
 //Removes slectable element
 $('ul').on('click', '.delete',function() {
-          $(this).parent().remove();
+          $(this).closest('li').remove();
           $('#sortable').trigger('sortupdate')
 });
 
@@ -144,12 +152,16 @@ $("button").button();
 $("button").click(function() { 
                 var addtype = $(this).attr('value');
               console.log('click');
-                var newElem = $('.new-' + addtype).clone().attr('style', 'display: block');
+                var newElem = $('.new-' + addtype).clone(true).attr('style', 'display: block');
                     $(newElem).removeClass("new-" + addtype);
                     $(newElem).children('input').attr('disabled',false);
                     $(newElem).appendTo('#sortable');
                 $(newElem).sortable( "refresh" );
                 $('#sortable').trigger('sortupdate');
+});
+
+$("button.AddExercise").click(function() { 
+$( "ul#sortableexercises" ).append('<li class=ui-state-default><input type="text" name="exercise.name[]" hint="Name" placeholder="Exercise Name"></li>')
 });
 
                   $('#Activity').find('input.datepicker').datepicker();
@@ -172,6 +184,20 @@ $("button").click(function() {
                  $('#Activity').find('input.datepicker').datepicker('setDate', new Date());
                  return false;
       });
+
+      $('#saveexercises').click(function() {
+                 var selector= "#ExerciseForm"
+                 //var formDataFirst = $(selector).toObject({mode: 'first'});
+                 var formDataAll = $(selector).toObject({mode: 'all'});
+                 socket.emit('updateexercises', formDataAll);
+                 
+                 console.log('All ', JSON.stringify(formDataAll, null, '	'));
+                       // to prevent the page from changing
+                 $('ul#sortableexercises li').remove();
+                 return false;
+      });
+
+
        
       
      $('#cancelform').click(function() {
@@ -185,6 +211,28 @@ $("button").click(function() {
 });
  
  
+$('ul').on('change', '.laptype',function() {
+       console.log ('value= ' + $(this).val() );
+   switch($(this).val()) {
+        case "Run":
+            $(this).siblings('span').html('<input type="text" name="activity.lap[0].run.name" placeholder="Location"><input type="text" name="activity.lap[0].run.time" placeholder="hh:mm:ss"><a href=# class=delete>delete</a>');            
+            break;
+        case "Bike":
+            $(this).siblings('span').html('<input type="text" name="activity.lap[0].bike.name" hint="Name" placeholder="Track Name"><input type="text" name="activity.lap[0].bike.distance" placeholder="Distance">    <input type="text" name="activity.lap[0].bike.time" placeholder="hh:mm:ss"><a href=# class=delete>delete</a>');
+            break;
+        case "Cardio":
+            $(this).siblings('span').html('<input type="text" name="activity.lap[0].cardio.name" placeholder="Machine"><input type="text" name="activity.lap[0].cardio.distance" placeholder="Distance"><input type="text" name="activity.lap[0].cardio.time" placeholder="hh:mm:ss"><a href=# class=delete>delete</a>');
+            break;
+        case "Exercise":
+            $(this).siblings('span').html('<input type="text" name="activity.lap[0].exercise.name" placeholder="Exercise Name">    <input type="text" name="activity.lap[0].exercise.sets" placeholder="Sets"><input type="text" name="activity.lap[0].exercise.sets" placeholder="Reps"><a href=# class=delete>delete</a>');
+            break;
+        case "Rest":
+            $(this).siblings('span').html('<input type="text" name="activity.lap[0].rest[0]" placeholder="Rest"><a href=# class=delete>delete</a>');
+            break;
+    };
+
+    });
+
 
 
       });
@@ -196,37 +244,19 @@ $("button").click(function() {
 <div id="logo"><H1>Workout Tracker</h1></div>
 <div id="display">
 <ul>
-
-<li style="display: none" class="new-run ui-state-highlight"><label class="uiindex"></label>
-    <label>Run</label>
-    <input type="text" name="activity.lap[0].run.name" placeholder="Location">
-    <input type="text" name="activity.lap[0].run.time" placeholder="hh:mm:ss">
-<a href=# class=delete>delete</a></li>
-
-<li style="display: none" class="new-bike ui-state-highlight"><label class="uiindex"></label>
-    <label>Bike</label>
-    <input type="text" name="activity.lap[0].bike.name" hint="Name" placeholder="Track Name">
-    <input type="text" name="activity.lap[0].bike.distance" placeholder="Distance">
-    <input type="text" name="activity.lap[0].bike.time" placeholder="hh:mm:ss">
-<a href=# class=delete>delete</a></li>
-
-<li style="display: none" class="new-cardio ui-state-highlight"><label class="uiindex"></label>
-    <label>Cardio</label>
-    <input type="text" name="activity.lap[0].cardio.name" placeholder="Machine">
-    <input type="text" name="activity.lap[0].cardio.distance" placeholder="Distance">
-    <input type="text" name="activity.lap[0].cardio.time" placeholder="hh:mm:ss">
-<a href=# class=delete>delete</a></li>
-
-<li style="display: none" class="new-exercise ui-state-highlight"><label class="uiindex"></label><label>Exercise</label>
-    <input type="text" name="activity.lap[0].exercise.name" placeholder="Exercise Name">
-    <input type="text" name="activity.lap[0].exercise.sets" placeholder="Sets">
-    <input type="text" name="activity.lap[0].exercise.sets" placeholder="Reps">
-<a href=# class=delete>delete</a></li>
-
-<li style="display: none" class="new-rest ui-state-highlight"><label class="uiindex"></label>
-    <label>Rest</label>
-    <input type="text" name="activity.lap[0].rest[0]" placeholder="Rest">
-<a href=# class=delete>delete</a></li>
+<li style="display: none" class="new-lap ui-state-highlight">
+<!--            <label class="uiindex">-->
+            <label class="uiindex"></label>
+            <select class="laptype">
+              <option value="">Select...</option>
+              <option value="Run">Run</option>
+              <option value="Bike">Bike</option>
+              <option value="Cardio">Cardio</option>
+              <option value="Exercise">Exercise</option>  
+              <option value="Rest">Rest</option>
+            </select>
+          <span></span>
+</li>
 </ul>
 	
 <div id="tabs">
@@ -239,11 +269,7 @@ $("button").click(function() {
     
 
       <div id="Activity">
-        <button class="Add" value="run">Add Run</button>
-        <button class="Add" value="bike">Add Bike</button>
-        <button class="Add" value="exercise">Add Exercise</button>
-        <button class="Add" value="cardio">Add Cardio</button>
-        <button class="Add" value="rest">Add Rest</button>
+        <button class="Add" value="lap">Add Lap</button>
             <form id="myForm">
             <ul id="activityheader">
             <li><label>Activity Name</label><input type="text" name="activity.name" placeholder="Location"><label>Date</label><input type="text" class="datepicker" name="activity.date"></li>
@@ -256,10 +282,15 @@ $("button").click(function() {
       </div>
       
       <div id="ExerciseEditor" >
+          <button class="AddExercise">Add Exercise</button>
           <button type="button" class="cancel" value="Cancel"/>Cancel</button>
           CODE FOR EDITING EXERCISES
+          <form id="ExerciseForm">
              <ul id="sortableexercises">
             </ul>
+            <button type="submit" id="saveexercises" value="Save">Save</button>
+            <button type="button" id="cancelexerciseform" value="Cancel"/>Cancel</button>
+        </form>
       </div>
       
       <div id="ExpressoEditor" >

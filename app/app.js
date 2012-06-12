@@ -4,6 +4,8 @@
  */
 var fs = require('fs');
 var path = require('path');
+var mongo = require('mongodb');
+var BSON = mongo.BSONPure;
 var db = require('mongoskin').db('localhost:27017/test'); 
 var testcollection = db.collection('testcollection');
 var exercisecollection = db.collection('exercisecollection');
@@ -105,6 +107,33 @@ io.sockets.on('connection', function(socket) {
             if (err) throw err;
             socket.emit('populateexercises', result);
         });
+    });
+    socket.on('updateexercises', function(data) {
+        console.log('updateexecises' + JSON.stringify(data))
+        if (data[0]._id  == 'undefined') {
+                delete data[0]._id
+                console.log('edited updateexecises' + JSON.stringify(data))
+                exercisecollection.insert(data, function(err, result) {
+                if (err) throw err;
+                        exercisecollection.find().toArray(function(err, result) {
+                        if (err) throw err;
+                        socket.emit('populateexercises', result);
+                        }); 
+                });
+        }
+        else {
+                var document_id = new BSON.ObjectID(data[0]._id);
+                delete data[0]._id;
+                exercisecollection.update({_id:document_id}, data[0],{upsert:true} , function(err, result) {
+                if (err) throw err;
+                         exercisecollection.find().toArray(function(err, result) {
+                         if (err) throw err;
+                             console.log('populateexercises');
+                                socket.emit('populateexercises', result);
+                         }); 
+                });
+                
+        };
     });
 ////////////////
      socket.on('getexpresso', function(data) {
