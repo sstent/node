@@ -13,22 +13,26 @@ html
     link(rel='stylesheet', href="stylesheets/smoothness/jquery-ui-1.8.20.custom.css")
     script#movieTemplate1(type="text/x-jsrender").
                 <tr>
-                    <td colspan=3>{{:activity.name}}</td>
-                    <td>{{:_id}}</td>
+                    <td><p class=RowDelete id={{:_id}}>Delete</p></td>
+                    <td class=RowShow id={{:_id}} colspan=3>{{:activity.name}}</td>
                     <td>{{:date}}</td>
                     <td>
+                    {{if activity.note}}
                         {{for activity.note}}
                             <div>
                             <em>{{:name}}</em>
                             </div>
                         {{/for}}
+                    {{/if}} 
                     </td>
                     <td>
-                        {{for activity.exercise}}
+                    {{if activity.exercise}}
+                       {{for activity.exercise}}
                             <div>
                             <em>{{:name}}</em><em>{{:sets}}</em><em>{{:reps}}</em><em>{{:weight}}</em>
                             </div>
                         {{/for}}
+                    {{/if}}
                     </td>
                     </td>
                 </tr>
@@ -37,40 +41,12 @@ html
     script
          $(function() {
                 //$( "#datepicker" ).datepicker();
-                var socket  = io.connect('http://localhost:3000');
+                var socket  = io.connect();
                 
                 socket.on('populate', function(json) {
+                    console.log('#poulate recieved');
                     var content = "";
                     $('#employees').empty(); 
-                    //iterate activities
-                    // $.each (json, function (bb) {
-                        // var activity = json[bb].activity;
-                        // content += '<p>Activity - '+ bb + '</p>';
-                        // if (typeof activity.name !== 'undefined') {
-                                // content += '<p>Name - '+ activity.name + '</p>'; 
-                        // };
-                        // if (typeof activity.note !== 'undefined') {
-                            // $.each (activity.note, function (cc) {
-                                // content += '<p>Note - '+ cc + '</p>'; 
-                            // });
-                        // };
-                        // if (typeof activity.exercise !== 'undefined') {
-                        // $.each (activity.exercise, function (cc) {
-                            // content += '<p>Exercise '+ cc +' - name:' + activity.exercise[cc].name +'</p>';
-                            // content += '<p>Exercise '+ cc +' - sets:' + activity.exercise[cc].sets +'</p>';
-                            // content += '<p>Exercise '+ cc +' - reps:' + activity.exercise[cc].reps +'</p>';
-                            // content += '<p>Exercise '+ cc +' - weight:' + activity.exercise[cc].weight +'</p>';
-                        // });
-                        // };
-                        
-                    // });
-                  // $(content).appendTo("#employees");
-                  // $.templates({
-                    // titleTemplate: "<tr><td colspan=3>{{:activity.name}}</td><td>{{:_id}}</td><td></td></tr>",
-                    // detailTemplate: "<tr><td>{{:name}}</td><td>Released: {{:releaseYear}}</td><td>director: {{:director}}</td></tr>"
-                    // });
-                    // content = $.render.titleTemplate( json );
-                  // $( "#employees" ).html( content );
                   $( "#employees" ).html(
                         $( "#movieTemplate1" ).render( json )
                     );
@@ -92,6 +68,7 @@ html
                     $(newElem).find('ul.activity li').children('input').attr('disabled',false);
                     $(newElem).find('ul.activity li').attr('style', 'display: block');
                     $(newElem).find('input.datefield').datepicker()
+                    $(newElem).find('input.datefield').datepicker('setDate', new Date())
                     $(newElem).appendTo('form#myForm');
                     
                  });
@@ -157,6 +134,12 @@ html
                     return false;
               });
 
+              $('#cancel').click(function() {
+                    $('.ActivityBlock').remove();
+                    $('#Activity').attr('style', 'display: none');
+                    
+                    return false;
+              });
 
              });
 

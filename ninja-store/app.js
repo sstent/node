@@ -97,24 +97,34 @@ console.log("Express server listening on port %d in %s mode", app.address().port
 var io = require('socket.io');
 io = io.listen(app);
 io.configure('development', function(){
-  io.set("transports", ["xhr-polling"]); 
-  io.set("polling duration", 10); 
+  //io.set("transports", ["xhr-polling"]); 
+  io.set("transports", ["websocket"]);
+  //io.set("polling duration", 20); 
+  //io.set("polling timeout", 20);
+  //io.set("log level", 1);
+  //io.set('heartbeat timeout', 5);
+  //io.set('heartbeat interval', 5);
 });
 
 io.sockets.on('connection', function(socket) {
   console.log('Client connected'); 
   
   socket.on('data', function(data) {
-            console.log("data" + JSON.stringify(data))
+            //console.log("data" + JSON.stringify(data))
                     testcollection.insert(data, function(err, result) {
                     if (err) throw err;
-                    if (result) console.log('Added!' + result);
+                    if (result) console.log('Added!');
+                             testcollection.find().toArray(function(err, result) {
+                                if (err) throw err;
+                                //console.log('This Is What I Got ' +JSON.stringify(result));
+                                socket.emit('populate', result);
+                            }); 
                     });
          });
         });
 
 function emitdata(channel,data) {
-    console.log('This Is What I should Emit ' +JSON.stringify(data));
+    console.log('This Is What I should Emit');
     io.sockets.on('connection', function (socket) {
       console.log('This Is What I Emit ' +JSON.stringify(data));
       socket.emit(channel, data);

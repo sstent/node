@@ -11,11 +11,16 @@
             div(id='Activity',style='display: none',)
                 form#myForm
                     input(type='submit', id='save', value='Save')
+                    input(type='button', id='cancel', value='Cancel')
                     div(Class='ActivityBlock_T', style='display: none')
-                        input(type='button', class='AddNeut', value='Add note Field', data-field='note_area', data-area='note', data-limit='1')
-                        input(type='button', class='AddNeut', value='Add exercise Field', data-field='exercise_area', data-area='exercise', data-limit='1')
-                        input(type='button', class='RemNeut noterem', value='Remove note Field', data-field='note_area', data-area='note', data-limit='0',  disabled='disabled')
-                        input(type='button', class='RemNeut exerciserem', value='Remove exercise Field', data-field='exercise_area', data-area='exercise', data-limit='0', disabled='disabled' )
+                        input(type='button', class='AddNeut', value='Add Note', data-field='note_area', data-area='note', data-limit='1')
+                        input(type='button', class='AddNeut', value='Add Exercise', data-field='exercise_area', data-area='exercise', data-limit='10')
+                        input(type='button', class='AddNeut', value='Add Run', data-field='run_area', data-area='run', data-limit='5')
+                        input(type='button', class='AddNeut', value='Add Bike', data-field='bike_area', data-area='bike', data-limit='5')
+                        input(type='button', class='RemNeut noterem', value='Remove Note', data-field='note_area', data-area='note', data-limit='0',  disabled='disabled')
+                        input(type='button', class='RemNeut exerciserem', value='Remove Exercise', data-field='exercise_area', data-area='exercise', data-limit='0', disabled='disabled' )
+                        input(type='button', class='RemNeut runrem', value='Remove Run', data-field='exercise_area', data-area='exercise', data-limit='0', disabled='disabled' )
+                        input(type='button', class='RemNeut bikerem', value='Remove Bike', data-field='exercise_area', data-area='exercise', data-limit='0', disabled='disabled' )
                         ul(class='activity')
                                 li(class='activity', style='display: none')
                                     label Activity
@@ -32,6 +37,17 @@
                                     input(type='text', name='activity.exercise[i].sets', value='Sets', disabled='disabled', class='numericonly')
                                     input(type='text', name='activity.exercise[i].reps', value='Reps', disabled='disabled')
                                     input(type='text', name='activity.exercise[i].weight', value='Weight', disabled='disabled')
+                          ul(class='run')
+                                li(class='run_T', style='display: none')
+                                    label Run                            
+                                    input(type='text', name='activity.run[i].time', value='Time', disabled='disabled')
+                                    input(type='text', name='activity.run[i].distance', value='Distance', disabled='disabled')
+                                    input(type='text', name='activity.run[i].location', value='Location', disabled='disabled')
+                        ul(class='bike')
+                                li(class='bike_T', style='display: none')
+                                    label Bike                            
+                                    input(type='text', name='activity.bike[i].track', value='Track', disabled='disabled')
+                                    input(type='text', name='activity.bike[i].time', value='Time', disabled='disabled', class='numericonly')
                                 
            ul#employees
         
