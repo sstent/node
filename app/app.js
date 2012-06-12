@@ -61,12 +61,22 @@ io.sockets.on('connection', function(socket) {
     console.log('Client connected'); 
     
 //    socket.on('getactivites', function(data) {
-        console.log('getactivites')    
+//        console.log('getactivites')    
+//        testcollection.find().toArray(function(err, result) {
+//            if (err) throw err;
+ //           socket.emit('populateactivities', result);
+ //       });
+//    });
+
+  socket.on('getactivites', function(data) {
+        console.log('getactivitesoooo')    
         testcollection.find().toArray(function(err, result) {
             if (err) throw err;
             socket.emit('populateactivities', result);
         });
-//    });
+    });
+
+
 ////////////////////////
     socket.on('addactivity', function(data) {
         console.log('addactivity' + JSON.stringify(data))    
@@ -90,15 +100,15 @@ io.sockets.on('connection', function(socket) {
     });
  ///////////////////
      socket.on('getexercises', function(data) {
-        console.log('getactivites')    
+     console.log('emit exercises')
         exercisecollection.find().toArray(function(err, result) {
             if (err) throw err;
             socket.emit('populateexercises', result);
         });
     });
 ////////////////
-     socket.on('getexpressotracks', function(data) {
-        console.log('getactivites')    
+     socket.on('getexpresso', function(data) {
+     console.log('emit expresso')
         expressocollection.find().toArray(function(err, result) {
             if (err) throw err;
             socket.emit('populateexpresso', result);

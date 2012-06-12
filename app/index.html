@@ -37,7 +37,7 @@
          $(document).ready(function() {
              var socket  = io.connect();
              
-             socket.emit('populateactivities', 'please');
+             socket.emit('getactivites', 'please');
              
              socket.on('populateactivities', function(json) {
                  console.log('#poulate recieved');
@@ -69,8 +69,34 @@
  //                   );      
                       
  
+$( "#tabs" ).tabs();
+$( "#tabs" ).tabs('select' , 0);
+//sets buttons to be jquery buttons
+$("button").button();
+//sets datepickers
+$( "#datepicker" ).datepicker();
+ 
 
-
+    $( "#tabs" ).bind( "tabsselect", function(event, ui) {
+    //console.log('index ' + ui.index );
+    //console.log('tab ' + ui.tab  );    
+    //console.log('panel ' + ui.panel );
+        if (ui.index == 0) { 
+        console.log('send stuff ' + ui.index );
+        socket.emit('getactivites', 'please');
+        };
+        if (ui.index == 2) { 
+        console.log('send stuff ' + ui.index );
+        socket.emit('getexercises', 'please');
+        };
+        if (ui.index == 3) { 
+        console.log('send stuff ' + ui.index );
+        socket.emit('getexpresso', 'please');
+        };
+        
+    });
+    
+    
 
              
       $('#ActivityList').delegate('a.activitydelete', 'click', function() {   
@@ -111,12 +137,7 @@ $('ul').on('click', '.delete',function() {
 });
 
 
-	$( "#tabs" ).tabs();
-    $( "#tabs" ).tabs('select' , 0);
-//sets buttons to be jquery buttons
-$("button").button();
-//sets datepickers
-$( "#datepicker" ).datepicker();
+
 
 $("button").button();   
 //adds selectable element
@@ -172,7 +193,7 @@ $("button").click(function() {
   </head>
   <body>
 <div id="container">
-<div id="logo"><img src="/images/logo.png"/></div>
+<div id="logo"><H1>Workout Tracker</h1></div>
 <div id="display">
 <ul>
 
@@ -210,7 +231,7 @@ $("button").click(function() {
 	
 <div id="tabs">
     <ul>
-        <li><a href="#Activities">Activities</a></li>
+        <li><a id="Activities_tab" href="#Activities">Activities</a></li>
 		<li><a href="#Activity">Add Activity</a></li>
 		<li><a href="#ExerciseEditor">Edit Exercises</a></li>
 		<li><a href="#ExpressoEditor">Edit Expresso Tracks</a></li>
