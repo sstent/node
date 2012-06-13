@@ -10,46 +10,92 @@ var db = require('mongoskin').db('localhost:27017/test');
 var testcollection = db.collection('testcollection');
 var exercisecollection = db.collection('exercisecollection');
 var expressocollection = db.collection('expressocollection');
-var hrdatacollection = db.collection('expressocollection');
+var hrdatacollection = db.collection('hrdatacollection');
+var util = require('util');
+var formidable = require('formidable');
+var xml2js = require('xml2js');
+var parser = new xml2js.Parser();
 
 var app = require('http').createServer(function handler(request, response) {
  
     console.log('request starting...;' + request.url);
-     
-    var filePath = '.' + request.url;
-    if (filePath == './')
-        filePath = './index.html';
-         
-    var extname = path.extname(filePath);
-    var contentType = 'text/html';
-    switch (extname) {
-        case '.js':
-            contentType = 'text/javascript';
-            break;
-        case '.css':
-            contentType = 'text/css';
-            break;
-    }
-     
-    path.exists(filePath, function(exists) {
-     
-        if (exists) {
-            fs.readFile(filePath, function(error, content) {
-                if (error) {
-                    response.writeHead(500);
-                    response.end();
-                }
-                else {
-                    response.writeHead(200, { 'Content-Type': contentType });
-                    response.end(content, 'utf-8');
-                }
+    
+ switch(request.url) {
+    case '/upload':
+            var form = new formidable.IncomingForm(),
+            files = [],
+            fields = [];
+
+            tempDirectory = "c:\\Temp\\";
+            form.uploadDir = tempDirectory;
+            
+            //form.uploadDir = root + '\node';
+
+            form.on('error', function(err) {
+                response.writeHead(200, {'content-type': 'text/plain'});
+                response.end('error:\n\n'+util.inspect(err));
+              });
+            form.on('field', function(field, value) {
+                console.log(field, value);
+                fields.push([field, value]);
+                });
+            form.on('file', function(field, file) {
+                console.log(field, file);
+                files.push([field, file]);
+                });
+            form.on('end', function() {
+                console.log('-> upload done');              
+                response.writeHead(200, {'content-type': 'text/plain'});
+                response.write('received fields:\n\n '+util.inspect(fields));
+                response.write('\n\n');
+                response.write('received files:\n\n '+util.inspect(files));
+                });
+                
+            form.parse(request, function(err, fields, files) {
+                    console.log('-> uploaded -' + files.upload.path);
+                fs.readFile(files.upload.path, function(err, data) {
+                parser.parseString(data, function (err, result) {
+                    response.end(JSON.stringify(result));
+                    console.log('Done');
+                });
             });
+            });
+    break;
+    default:
+        var filePath = '.' + request.url;
+        if (filePath == './')
+            filePath = './index.html';
+             
+        var extname = path.extname(filePath);
+        var contentType = 'text/html';
+        switch (extname) {
+            case '.js':
+                contentType = 'text/javascript';
+                break;
+            case '.css':
+                contentType = 'text/css';
+                break;
         }
-        else {
-            response.writeHead(404);
-            response.end();
-        }
-    });
+        path.exists(filePath, function(exists) {
+         
+            if (exists) {
+                fs.readFile(filePath, function(error, content) {
+                    if (error) {
+                        response.writeHead(500);
+                        response.end();
+                    }
+                    else {
+                        response.writeHead(200, { 'Content-Type': contentType });
+                        response.end(content, 'utf-8');
+                    }
+                });
+            }
+            else {
+                response.writeHead(404);
+                response.end();
+            }
+        });
+    };
 }).listen(3000);
 
                   
@@ -71,25 +117,55 @@ io.sockets.on('connection', function(socket) {
 //    });
 
   socket.on('getactivites', function(data) {
-        console.log('getactivitesoooo')    
+        console.log('getactivites')    
         testcollection.find().toArray(function(err, result) {
             if (err) throw err;
             socket.emit('populateactivities', result);
         });
     });
-
-
-////////////////////////
-    socket.on('addactivity', function(data) {
-        console.log('addactivity' + JSON.stringify(data))    
-        testcollection.insert(data, function(err, result) {
+///////////////////////////////////////
+  socket.on('getactivitybyid', function(id) {
+        console.log('getactivitybyid')    
+        testcollection.findById(id, function(err, result) {
             if (err) throw err;
-            testcollection.find().toArray(function(err, result) {
-                if (err) throw err;
-                socket.emit('populateactivities', result);
-            }); 
+            socket.emit('populateactivitybyid', result);
         });
     });
+    
+
+////////////////////////
+    socket.on('addactivity', function(data, docid) {
+        console.log('addactivity' + docid)    
+        //testcollection.insert(data, function(err, result) {
+        //    if (err) throw err;
+        //    testcollection.find().toArray(function(err, result) {
+        //        if (err) throw err;
+        //        socket.emit('populateactivities', result);
+        //    }); 
+        
+                if (docid  == 'undefined') {
+                testcollection.insert(data, function(err, result) {
+                if (err) throw err;
+                        testcollection.find().toArray(function(err, result) {
+                        if (err) throw err;
+                        socket.emit('populatactivities', result);
+                        }); 
+                });
+        }
+        else {
+                var document_id = new BSON.ObjectID(docid);
+                testcollection.update({_id:document_id}, data,{upsert:true} , function(err, result) {
+                if (err) throw err;
+                         exercisecollection.find().toArray(function(err, result) {
+                         if (err) throw err;
+                             console.log('populateexercises');
+                                socket.emit('populateexercises', result);
+                         }); 
+                });
+                
+        };
+    });
+
 /////////////////////    
         socket.on('delactivity', function(id) {
             testcollection.removeById(id,function(err, reply){
@@ -108,10 +184,9 @@ io.sockets.on('connection', function(socket) {
             socket.emit('populateexercises', result);
         });
     });
-    socket.on('updateexercises', function(data) {
+    socket.on('updateexercises', function(data, docid) {
         console.log('updateexecises' + JSON.stringify(data))
-        if (data[0]._id  == 'undefined') {
-                delete data[0]._id
+        if (docid  == 'undefined') {
                 console.log('edited updateexecises' + JSON.stringify(data))
                 exercisecollection.insert(data, function(err, result) {
                 if (err) throw err;
@@ -122,9 +197,8 @@ io.sockets.on('connection', function(socket) {
                 });
         }
         else {
-                var document_id = new BSON.ObjectID(data[0]._id);
-                delete data[0]._id;
-                exercisecollection.update({_id:document_id}, data[0],{upsert:true} , function(err, result) {
+                var document_id = new BSON.ObjectID(docid);
+                exercisecollection.update({_id:document_id}, data,{upsert:true} , function(err, result) {
                 if (err) throw err;
                          exercisecollection.find().toArray(function(err, result) {
                          if (err) throw err;
@@ -142,6 +216,33 @@ io.sockets.on('connection', function(socket) {
             if (err) throw err;
             socket.emit('populateexpresso', result);
         });
+    });
+        socket.on('updateexpresso', function(data, docid) {
+        
+        if (docid  == 'undefined') {
+        console.log('addedexpresso ' + JSON.stringify(data))
+                console.log('edited updateexpresso' + JSON.stringify(data))
+                expressocollection.insert(data, function(err, result) {
+                if (err) throw err;
+                        expressocollection.find().toArray(function(err, result) {
+                        if (err) throw err;
+                        socket.emit('populateexpresso', result);
+                        }); 
+                });
+        }
+        else {
+        console.log('updateexpresso ' + JSON.stringify(data))
+                var document_id = new BSON.ObjectID(docid);
+                expressocollection.update({_id:document_id}, data,{upsert:true} , function(err, result) {
+                if (err) throw err;
+                         expressocollection.find().toArray(function(err, result) {
+                         if (err) throw err;
+                             console.log('populateexpresoo');
+                                socket.emit('populateexpresso', result);
+                         }); 
+                });
+                
+        };
     });
 ////////////////
     
