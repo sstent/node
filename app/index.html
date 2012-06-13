@@ -76,15 +76,15 @@
                  var array = json.Activities.Activity.Lap;
                     $.each(array, function(index, value) {
                     ////if run
-                    if ("run" in value) { AddPopulatedLap("Run", value.run.name, value.run.time, value.run.distance, "", "" , "")};
+                    if ("run" in value) { addpopulatedlap("run", value.run.name, value.run.time, value.run.distance, "", "" , "")};
                     ////if bike
-                    if ("bike" in value) { AddPopulatedLap("Bike", value.bike.name, value.bike.time, value.bike.distance, "", "" , "")};
+                    if ("bike" in value) { addpopulatedlap("bike", value.bike.name, value.bike.time, value.bike.distance, "", "" , "")};
                     ////if cardio
-                    if ("cardio" in value) { AddPopulatedLap("Cardio", value.cardio.name, value.cardio.time, value.cardio.distance, "", "" , "")};
+                    if ("cardio" in value) { addpopulatedlap("cardio", value.cardio.name, value.cardio.time, value.cardio.distance, "", "" , "")};
                     ////if exercise
-                    if ("exercise" in value) { AddPopulatedLap("Exercise", value.exercise.name, "", "", value.exercise.sets, value.exercise.reps , value.exercise.weight)};
+                    if ("exercise" in value) { addpopulatedlap("exercise", value.exercise.name, "", "", value.exercise.sets, value.exercise.reps , value.exercise.weight)};
                     ////if rest
-                    if ("rest" in value) { AddPopulatedLap("Rest", "", "", "", "", "" , "")};
+                    if ("rest" in value) { addpopulatedlap("rest", "", "", "", "", "" , "")};
                }); 
                
                };

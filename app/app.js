@@ -26,6 +26,17 @@ var app = require('http').createServer(function handler(request, response) {
             files = [],
             fields = [];
 
+            // var tempDirectory = "/tmp/";
+
+            // //tempdirectory changes if the operating system is windows
+            // if(os.type().indexof("windows") > -1)
+            // {
+            // tempdirectory = "c:\\temp\\";
+            // }
+            // form.uploaddir = tempdirectory;
+            
+            
+            
             tempDirectory = "c:\\Temp\\";
             form.uploadDir = tempDirectory;
             
