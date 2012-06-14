@@ -1,0 +1,15 @@
+TODO
+
+- Add parsed HR XML to Activity
+
+- fix autocomplete foer bike tracks
+    - add auto pop on track seletion for other fields on bike
+
+- 'Add metics' Tab and DB
+    -- Add Metic info tab? or combine with activity tab
+    
+-- add OS detection for temp file directory
+    -=- https://github.com/felixge/node-formidable/issues/88
+    
+-- split JS and HTML files
+
