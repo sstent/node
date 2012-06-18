@@ -26,21 +26,17 @@ var app = require('http').createServer(function handler(request, response) {
             files = [],
             fields = [];
 
-            // var tempDirectory = "/tmp/";
+            var tempDirectory = "/tmp/";
 
             // //tempdirectory changes if the operating system is windows
-            // if(os.type().indexof("windows") > -1)
-            // {
-            // tempdirectory = "c:\\temp\\";
-            // }
-            // form.uploaddir = tempdirectory;
-            
-            
-            
-            tempDirectory = "c:\\Temp\\";
-            form.uploadDir = tempDirectory;
-            
-            //form.uploadDir = root + '\node';
+            if(os.type().indexof("windows") > -1)
+            {
+                tempdirectory = "c:\\temp\\";
+            }
+            form.uploaddir = tempdirectory;
+
+            //tempDirectory = "c:\\Temp\\";
+            //form.uploadDir = tempDirectory;
 
             form.on('error', function(err) {
                 response.writeHead(200, {'content-type': 'text/plain'});
@@ -119,14 +115,6 @@ io.set("transports", ["websocket"]);
 io.sockets.on('connection', function(socket) {
     console.log('Client connected'); 
     
-//    socket.on('getactivites', function(data) {
-//        console.log('getactivites')    
-//        testcollection.find().toArray(function(err, result) {
-//            if (err) throw err;
- //           socket.emit('populateactivities', result);
- //       });
-//    });
-
   socket.on('getactivites', function(data) {
         console.log('getactivites')    
         testcollection.find().toArray(function(err, result) {
@@ -147,34 +135,23 @@ io.sockets.on('connection', function(socket) {
 ////////////////////////
     socket.on('addactivity', function(data, docid) {
         console.log('addactivity' + docid)    
-        //testcollection.insert(data, function(err, result) {
-        //    if (err) throw err;
-        //    testcollection.find().toArray(function(err, result) {
-        //        if (err) throw err;
-        //        socket.emit('populateactivities', result);
-        //    }); 
-        
-                if (docid  == 'undefined') {
-                testcollection.insert(data, function(err, result) {
-                if (err) throw err;
-                        testcollection.find().toArray(function(err, result) {
-                        if (err) throw err;
-                        socket.emit('populatactivities', result);
-                        }); 
-                });
-        }
-        else {
+        if (docid  === null) {
+                 var document_id = new BSON.ObjectID();
+         }
+         else {
+            var document_id = new BSON.ObjectID(docid);
+          };
                 var document_id = new BSON.ObjectID(docid);
+                console.log('inserted BSONID' + document_id);
                 testcollection.update({_id:document_id}, data,{upsert:true} , function(err, result) {
                 if (err) throw err;
                          exercisecollection.find().toArray(function(err, result) {
                          if (err) throw err;
-                             console.log('populateexercises');
                                 socket.emit('populateexercises', result);
                          }); 
                 });
                 
-        };
+
     });
 
 /////////////////////    
