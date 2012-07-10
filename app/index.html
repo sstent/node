@@ -36,6 +36,18 @@
       </div>
       
     </script>
+    <script id="DataTemplate1" type="text/x-jsrender">
+      <h3>{{:Activities.Activity.date}} - {{:Activities.Activity.name}}</h3>
+      <div class="workoutdata">
+          <h4>{{:Activities.Activity.date}} - {{:Activities.Activity.name}}</h4>
+          <a  href=# class="activitydelete" title="{{:_id}}" >Delete</a>
+          <a  href=# class="activityedit" title="{{:_id}}" >Edit</a>
+      </div>
+      
+    </script>
+
+
+
   </head>
   <body>
 <div id="container">
@@ -59,6 +71,7 @@
 <div id="tabs">
     <ul>
         <li><a id="Activities_tab" href="#Activities">Activities</a></li>
+        <li><a id="Data_tab" href="#Data">Data</a></li>
 		<li><a href="#Activity">Add Activity</a></li>
 		<li><a href="#ExerciseEditor">Edit Exercises</a></li>
 		<li><a href="#ExpressoEditor">Edit Expresso Tracks</a></li>
@@ -119,6 +132,11 @@
       <div id="Activities">
       <ul id="ActivityList"></ul>
       </div>
+
+      <div id="Data">
+      <ul id="DataList"></ul>
+      </div>
+
 </div>
     </div>
  </div>
