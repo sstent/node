@@ -15,6 +15,7 @@ var util = require('util');
 var formidable = require('formidable');
 var xml2js = require('xml2js');
 var parser = new xml2js.Parser();
+var dateFormat = require('dateformat');
 
 var app = require('http').createServer(function handler(request, response) {
  
@@ -26,10 +27,10 @@ var app = require('http').createServer(function handler(request, response) {
             files = [],
             fields = [];
 
-            var tempDirectory = "/tmp/";
+            var tempdirectory = "/tmp/";
 
             // //tempdirectory changes if the operating system is windows
-            if(os.type().indexof("windows") > -1)
+            if(process.platform == "windows")
             {
                 tempdirectory = "c:\\temp\\";
             }
@@ -62,8 +63,23 @@ var app = require('http').createServer(function handler(request, response) {
                     console.log('-> uploaded -' + files.upload.path);
                 fs.readFile(files.upload.path, function(err, data) {
                 parser.parseString(data, function (err, result) {
-                    response.end(JSON.stringify(result));
+                response.write('received file contents:\n\n ');
+		response.end(JSON.stringify(result));
                     console.log('Done');
+
+		//hrdatacollectionJSON.stringify(result)
+		var data = JSON.stringify(result)
+		var buf1 = new Buffer(12);
+		var dataid = JSON.parse(data).Activities.Activity.Id;
+		var datadate = Date.parse(dataid);
+                //console.log('TCX ID' + JSON.parse(data).Activities.Activity.Id);
+		console.log('TCX ID ' + datadate);
+		var document_id = new BSON.ObjectID(datadate);
+                console.log('inserted BSONID ' + document_id);
+                hrdatacollection.update({_id:document_id}, data,{upsert:true} , function(err, result) {
+                if (err) throw err;
+                });
+
                 });
             });
             });
@@ -141,7 +157,7 @@ io.sockets.on('connection', function(socket) {
          else {
             var document_id = new BSON.ObjectID(docid);
           };
-                var document_id = new BSON.ObjectID(docid);
+                //var document_id = new BSON.ObjectID(docid);
                 console.log('inserted BSONID' + document_id);
                 testcollection.update({_id:document_id}, data,{upsert:true} , function(err, result) {
                 if (err) throw err;
