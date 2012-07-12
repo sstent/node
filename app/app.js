@@ -249,6 +249,14 @@ io.sockets.on('connection', function(socket) {
         };
     });
 ////////////////
+     socket.on('gethrdata', function(data) {
+     console.log('emit hrdata')
+        hrdatacollection.find().toArray(function(err, result) {
+            if (err) throw err;
+            socket.emit('populatehrdata', result);
+        });
+    });
+
     
 ////////////////    
 });
